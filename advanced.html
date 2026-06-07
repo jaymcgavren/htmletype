@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>kiosk</title>
+<style>
+  /* ---- Tunable colors (change these two lines to re-theme) ---- */
+  :root {
+    --fg: #00ff00;   /* bright green text       */
+    --bg: #000000;   /* black background        */
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  #screen {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+    color: var(--fg);
+    background: var(--bg);
+    font-family: "DejaVu Sans Mono", "Liberation Mono", Consolas, monospace;
+    font-size: 72px;
+    line-height: 1.3;
+    white-space: pre-wrap;     /* wrap long lines, preserve newlines */
+    word-break: break-word;
+    overflow: hidden;          /* we trim old text instead of scrolling */
+  }
+
+  /* Solid block cursor that hard-blinks like a terminal. */
+  #cursor {
+    display: inline-block;
+    width: 0.6em;
+    height: 1.05em;
+    margin-left: 1px;
+    background: var(--fg);
+    vertical-align: text-bottom;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    0%, 50%   { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <pre id="screen"><span id="text"></span><span id="cursor"></span></pre>
+
+  <script>
+  (function () {
+    "use strict";
+
+    // ----------------------------------------------------------------
+    //  Configuration
+    // ----------------------------------------------------------------
+    var SNIPPETS = [
+      "Certification is required prior to using any welding equipment. Ask your host for more info!",
+      "We have no paid staff, but our volunteer hosts can answer your questions! Every open hours has a host. If you don't know who today's host is, ask around!",
+      "Our discussion board is on Google Groups. The link is on our site at https://heatsynclabs.org",
+      "We use the Slack app for chat. The link is on our site at https://heatsynclabs.org",
+      "Our tools, our workbenches, our wi-fi... Everything starts out with a volunteer seeing something the lab needs, and making it happen!",
+      "HeatSync has to pay rent for this space. Your donations help!",
+      "Only our most trusted, knowledgeable, and helpful members get card access! They are nominated and then voted in.",
+      "Want to donate? You'll find boxes around the lab. You'll also see QR codes that will let you donate via Zelle, PayPal, and more!",
+      "We can't make your project for you, but you can use our tools! Our volunteers may have helpful knowledge, too!",
+      "Using any equipment requires signing a liability waiver. Ask your host for info!",
+      "Why is certification required to use our laser cutters? Because you need to know what materials may release toxic gases when cut! (It's a thing!)",
+      "Certification is required prior to using any metalworking tools. Ask your host for more info!",
+      "Our board is elected by our members. They help keep the lights on and the rent paid. If you see a board member, thank them!",
+      "Hack Your Hackerspace is our twice-monthly forum where members vote on proposals, then help clean up the lab!",
+      "Our lost and found is on a metal shelf next to the member storage boxes, near the laser cutters. Also try asking on Slack or Google Groups!",
+      "We know tools break sometimes! But please notify your host about it immediately!",
+      "Our Bylaws are the rules by which the lab operates. https://wiki.heatsynclabs.org/wiki/Bylaws",
+      "There are free public parking lots nearby! https://wiki.heatsynclabs.org/wiki/parking",
+      "Everyone in the metal shop must be wearing protective eyewear if any machines are running!",
+      "Please keep the floors clear of trip hazards!",
+      "Our wi-fi password is printed above the front door!",
+      "Our First Aid kit is next to the bathrooms.",
+      "Flammable chemicals, such as oil-based wood stain, should be stored in the flammables lockers near the kitchen.",
+      "Please clean up your trash, but especially food trash! We don't want any smells (or pests)!",
+      "Why is certification required to use our laser cutters? Because you need to know what to do if your materials catch fire! (It happens!)",
+      "We're a makerspace first and a meeting space second. It can get noisy. But please avoid operating loud equipment during scheduled meetups (check the calendar)!",
+      "Proposals must be posted to our Google Groups forum 9 days before Hack Your Hackerspace to be eligible for voting.",
+      "If you think anything in the lab is unsafe, please notify your host immediately!",
+      "We provide a friendly and safe environment for all. Please notify your host if you see anyone acting otherwise."
+    ];
+
+    var TYPE_DELAY_MS    = 15;   // base delay between characters
+    var TYPE_JITTER_MS   = 10;   // random extra delay (0..this) per char
+    var PAUSE_AFTER_MS   = 5000;  // pause after a snippet finishes, before clearing
+
+    // ----------------------------------------------------------------
+    //  Engine
+    // ----------------------------------------------------------------
+    var textEl   = document.getElementById("text");
+    var textNode = document.createTextNode("");
+    textEl.appendChild(textNode);
+
+    var snippetIndex = 0;
+    var charIndex    = 0;
+
+    function step() {
+      var snippet = SNIPPETS[snippetIndex];
+
+      if (charIndex < snippet.length) {
+        textNode.appendData(snippet.charAt(charIndex));
+        charIndex++;
+        setTimeout(step, TYPE_DELAY_MS + Math.random() * TYPE_JITTER_MS);
+      } else {
+        // Finished this snippet: pause, then clear the screen and move on.
+        setTimeout(function () {
+          textNode.data = "";
+          charIndex = 0;
+          snippetIndex = (snippetIndex + 1) % SNIPPETS.length;
+          step();
+        }, PAUSE_AFTER_MS);
+      }
+    }
+
+    step();
+  })();
+  </script>
+</body>
+</html>
