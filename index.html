@@ -122,36 +122,22 @@
 
     var snippetIndex = 0;
     var charIndex    = 0;
-    var first        = true;
-
-    function trim() {
-      // Keep the text node bounded so it runs forever without bloating.
-      var d = textNode.data;
-      if (d.length > MAX_CHARS) {
-        var cut = d.slice(d.length - MAX_CHARS);
-        var nl  = cut.indexOf("\n");           // align trim to a line break
-        textNode.data = nl >= 0 ? cut.slice(nl + 1) : cut;
-      }
-    }
 
     function step() {
       var snippet = SNIPPETS[snippetIndex];
-
-      if (charIndex === 0) {
-        if (!first) { textNode.appendData("\n"); }
-        first = false;
-      }
 
       if (charIndex < snippet.length) {
         textNode.appendData(snippet.charAt(charIndex));
         charIndex++;
         setTimeout(step, TYPE_DELAY_MS + Math.random() * TYPE_JITTER_MS);
       } else {
-        // Finished this snippet: advance and pause.
-        trim();
-        charIndex = 0;
-        snippetIndex = (snippetIndex + 1) % SNIPPETS.length;
-        setTimeout(step, PAUSE_AFTER_MS);
+        // Finished this snippet: pause, then clear the screen and move on.
+        setTimeout(function () {
+          textNode.data = "";
+          charIndex = 0;
+          snippetIndex = (snippetIndex + 1) % SNIPPETS.length;
+          step();
+        }, PAUSE_AFTER_MS);
       }
     }
 
