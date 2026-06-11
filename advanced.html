@@ -104,8 +104,11 @@
     var textNode = document.createTextNode("");
     textEl.appendChild(textNode);
 
-    var snippetIndex = 0;
-    var charIndex    = 0;
+    var SNIPPETS_PER_SCREEN = 2; // snippets typed before clearing
+
+    var snippetIndex   = 0;
+    var charIndex      = 0;
+    var screenSnippets = 0; // how many snippets typed since the last clear
 
     function step() {
       var snippet = SNIPPETS[snippetIndex];
@@ -115,11 +118,20 @@
         charIndex++;
         setTimeout(step, TYPE_DELAY_MS + Math.random() * TYPE_JITTER_MS);
       } else {
-        // Finished this snippet: pause, then clear the screen and move on.
+        // Finished this snippet: pause so it can be read.
+        charIndex = 0;
+        snippetIndex = (snippetIndex + 1) % SNIPPETS.length;
+        screenSnippets++;
+
         setTimeout(function () {
-          textNode.data = "";
-          charIndex = 0;
-          snippetIndex = (snippetIndex + 1) % SNIPPETS.length;
+          if (screenSnippets < SNIPPETS_PER_SCREEN) {
+            // More to type on this screen: add a blank line and keep going.
+            textNode.appendData("\n\n");
+          } else {
+            // Screen full: clear and start a fresh screen.
+            textNode.data = "";
+            screenSnippets = 0;
+          }
           step();
         }, PAUSE_AFTER_MS);
       }
